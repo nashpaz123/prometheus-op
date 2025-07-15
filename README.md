@@ -100,7 +100,12 @@ How about a few more queries: https://github.com/nashpaz123/prometheus-op/blob/m
 
 check [my-custom-rules.yaml](https://raw.githubusercontent.com/nashpaz123/prometheus-op/refs/heads/main/my-custom-rules.yaml)
 ~~~
-kubectl apply -f https://raw.githubusercontent.com/nashpaz123/prometheus-op/refs/heads/main/my-custom-rules.yaml #edit HighCPUUsage
+kubectl apply -f https://raw.githubusercontent.com/nashpaz123/prometheus-op/refs/heads/main/my-custom-rules.yaml #edit NotSoHighCPUUsage
+#on the node:
 ( for i in {1..4}; do while :; do :; done & done; wait ) #to load the cpus
+#or as pod:
+kubectl run stress-cpu-visible --image=alpine --restart=Never -it -- \
+  sh -c 'echo "Starting CPU stress loop..."; while true; do echo "Stressing CPU..."; done'
+
 
 https://github.com/ContainerSolutions/k8s-deployment-strategies
