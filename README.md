@@ -87,11 +87,14 @@ USER: admin Password: prom-operator
 export ALBHOST="http://"$(kubectl  get svc prometheus-kube-prometheus-prometheus --output jsonpath='{.status.loadBalancer.ingress[:1].hostname}'):9090 && echo $ALBHOST
 ~~~
 
-5. Browse Prometheous:
+5. Browse Alertmanger:
 ~~~
 kubectl  get svc -A |grep alertm #dont forget to add port 9093
 ~~~
 
-
+in prometheus try a query, graph:
+~~~
+sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{container!=""}[1m])) * 1000
+~~~
 
 https://github.com/ContainerSolutions/k8s-deployment-strategies
