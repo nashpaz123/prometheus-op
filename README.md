@@ -96,5 +96,11 @@ in prometheus try a query, graph:
 ~~~
 sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{container!=""}[1m])) * 1000
 ~~~
+How about a few more queries: https://github.com/nashpaz123/prometheus-op/blob/main/cheetsheets/README.md 
+
+check [my-custom-rules.yaml](https://raw.githubusercontent.com/nashpaz123/prometheus-op/refs/heads/main/my-custom-rules.yaml)
+~~~
+kubectl apply -f https://raw.githubusercontent.com/nashpaz123/prometheus-op/refs/heads/main/my-custom-rules.yaml #edit HighCPUUsage
+( for i in {1..4}; do while :; do :; done & done; wait ) #to load the cpus
 
 https://github.com/ContainerSolutions/k8s-deployment-strategies
