@@ -1,0 +1,110 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: custom-prometheus-rules
+  namespace: default
+  labels:
+    release: prometheus
+spec:
+  groups:
+    - name: example.rules
+      rules:
+        - alert: TestAlert
+          expr: vector(1)
+          for: 10s
+          labels:
+            severity: info
+          annotations:
+            summary: "Always firing test alert"
+            description: "Use this to test the alert flow"
+
+    - name: node.rules
+      rules:
+        - alert: HighMemoryUsage
+          expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) < 0.2
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High Memory Usage"
+            description: "Available memory is less than 20% on {{ $labels.instance }}"
+
+        - alert: NotSoHighCPUUsage
+          expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 15
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High CPU Usage"
+            description: "CPU usage > 15% on {{ $labels.instance }}"
+
+        - alert: DiskSpaceLow
+          expr: (node_filesystem_avail_bytes{fstype=~"ext4|xfs"} / node_filesystem_size_bytes{fstype=~"ext4|xfs"}) < 0.15
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Disk space low"
+            description: "Less than 15% disk space left on {{ $labels.instance }} mount {{ $labels.mountpoint }}"
+
+    - name: predictive.rules
+      rules:
+        - alert: CPUTrendingHigh
+          expr: predict_linear(rate(node_cpu_seconds_total{mode="user"}[5m])[1h:5m], 3600) > 0.9
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "CPU usage predicted to go above 90% soon"
+            description: "CPU on {{ $labels.instance }} is trending upward based on 1h linear regression"
+
+        - alert: DiskUsageTrendingFull
+          expr: predict_linear(node_filesystem_free_bytes[1h], 3600*2) < 10 * 1024 * 1024 * 1024
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Disk likely to fill in 2h"
+            description: "Predicted disk usage on {{ $labels.instance }} will hit 10GB in 2 hours"
+
+    - name: fun.rules
+      rules:
+        - alert: NodeTimeJumped
+          expr: abs(node_timex_offset_seconds) > 0.05
+          for: 1m
+          labels:
+            severity: info
+          annotations:
+            summary: "Time jump detected"
+            description: "Node {{ $labels.instance }} had an NTP offset > 50ms"
+
+        - alert: HighTemperatureDetected
+          expr: node_hwmon_temp_celsius > 80
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High temperature"
+            description: "Node {{ $labels.instance }} temperature exceeded 80°C"
+
+    - name: uptime.rules
+      rules:
+        - alert: InstanceDown
+          expr: up == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Instance down"
+            description: "{{ $labels.instance }} is unreachable (exporter down)"
+
+    - name: jaeger.rules
+      rules:
+        - alert: JaegerQueryDown
+          expr: up{job="jaeger-query"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Jaeger query service is down"
+            description: "Could not scrape jaeger-query — tracing visibility may be lost."
