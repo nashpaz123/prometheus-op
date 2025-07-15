@@ -1,0 +1,45 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: 'default-email' # Default receiver if no child routes match
+
+  routes:
+  - match:
+      severity: 'critical'
+    receiver: 'pagerduty'
+    group_wait: 10s # Override parent group_wait for critical alerts
+
+  - match:
+      severity: 'warning'
+    receiver: 'slack-alerts'
+
+receivers:
+- name: 'default-email'
+  email_configs:
+  - to: 'oncall@example.com'
+    from: 'alertmanager@example.com'
+    smarthost: 'smtp.gmail.com:587'
+    auth_username: 'your-gmail-username'
+    auth_password: 'your-gmail-password'
+
+- name: 'pagerduty'
+  pagerduty_configs:
+  - service_key: '<your-pagerduty-service-key>'
+
+- name: 'slack-alerts'
+  slack_configs:
+  - api_url: 'https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX'
+    channel: '#alerts-channel'
+    send_resolved: true # Send notification when alert resolves
+
+inhibit_rules:
+  - source_match:
+      alertname: 'HostDown'
+    target_match:
+      alertname: 'ServiceDown'
+    equal: ['instance', 'cluster'] # If 'HostDown' is firing for an instance, inhibit 'ServiceDown' for that instance
