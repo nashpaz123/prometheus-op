@@ -135,3 +135,34 @@ EOF
 
 helm upgrade prometheus prometheus-community/kube-prometheus-stack -f prometheus-values.yaml
 ~~~
+
+or for several matches:
+~~~
+cat <<EOF > prometheus-values.yaml
+grafana:
+  service:
+    type: LoadBalancer
+
+prometheus:
+  service:
+    type: LoadBalancer
+  prometheusSpec:
+    podMonitorSelector:
+      matchExpressions:
+        - key: team
+          operator: In
+          values:
+            - frontend
+        - key: release
+          operator: In
+          values:
+            - prometheus
+
+alertmanager:
+  service:
+    type: LoadBalancer
+EOF
+
+helm upgrade prometheus prometheus-community/kube-prometheus-stack -f prometheus-values.yaml
+
+~~~
