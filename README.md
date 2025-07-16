@@ -106,6 +106,32 @@ kubectl apply -f https://raw.githubusercontent.com/nashpaz123/prometheus-op/refs
 #or as pod:
 kubectl run stress-cpu-visible --image=alpine --restart=Never -it -- \
   sh -c 'echo "Starting CPU stress loop..."; while true; do echo "Stressing CPU..."; done'
+~~~
 
+ PodMonitor:
+~~~
+kubectl apply -f https://raw.githubusercontent.com/yanivomc/seminars/K8S/K8S/advanced/monitoring/examples/pod-metrics.yaml
+~~~
 
-https://github.com/ContainerSolutions/k8s-deployment-strategies
+but kubectl get prometheus prometheus-kube-prometheus-prometheus -oyaml podmonitor matches some basic propmetheus label
+~~~
+cat <<EOF > prometheus-values.yaml
+grafana:
+  service:
+    type: LoadBalancer
+
+prometheus:
+  service:
+    type: LoadBalancer
+  prometheusSpec:
+    podMonitorSelector:
+      matchLabels:
+        team: frontend
+
+alertmanager:
+  service:
+    type: LoadBalancer
+EOF
+
+helm upgrade prometheus prometheus-community/kube-prometheus-stack -f prometheus-values.yaml
+~~~
