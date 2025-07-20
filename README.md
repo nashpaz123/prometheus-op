@@ -1,3 +1,7 @@
+https://surveys.segmanta.com/c2l9b0/q
+
+https://drive.google.com/drive/folders/1ad9btfYgUhoQFr3Fo1f2b22H7ut4Wqj8
+
 Lets go over:
 
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
